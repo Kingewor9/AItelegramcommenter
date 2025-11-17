@@ -2,6 +2,7 @@ import random
 import config as cfg
 from google import genai
 from google.genai import types
+import sys # <--for clean exits if needed
 
 # Initialize the Gemini Client globally
 # It will automatically use the GEMINI_API_KEY from config.py
@@ -13,27 +14,29 @@ except Exception as e:
 
 # Your core instruction for the AI model
 SYSTEM_INSTRUCTION = (
-    "You are a helpful and engaging comment bot. "
-    "Your response must be a single, one-liner comment. "
-    "Do not use any emojis, adhere strictly to simple English, and avoid complex grammar or punctuation. "
-    "The comment must be valuable and directly related to the provided post text. "
-    "Examples: 'great take on this', 'need more info', 'exactly right'"
+    "You are a sophisticated and smart business strategist and digital marketing expert. "
+    "Your response must be a single, short, one-liner statement. "
+    "Comment with the insight of a professional who 'knows his onions'. "
+    "When contextually relevant, you may drop a classic, simple business quote or mantra, but keep it brief. "
+    "Do not use any emojis, adhere strictly to simple English, and avoid complex grammar or punctuation (use only periods). "
+    "The comment must be valuable and directly related to the provided post text, and must not exceed 100 characters."
 )
 
-# Fallback comments in case the AI API fails
-FALLBACK_COMMENTS = [
-    "Interesting read, great points raised.",
-    "Good information here, appreciate the share.",
-    "A valuable perspective, thanks for the insight.",
-    "Solid point, something to think about.",
-    "Totally agree with this analysis."
-]
+# ----------------------------------------------------
+#  REMOVED: FALLBACK_COMMENTS list has been deleted.
+# ----------------------------------------------------
 
 
 def generate_comment(post_text: str, mode="RANDOM"):
     if mode == "RANDOM":
         # Keep the existing static comment logic for RANDOM mode
-        return random.choice(cfg.COMMENTS)
+        # NOTE: This assumes cfg.COMMENTS is defined in config.py
+        try:
+            return random.choice(cfg.COMMENTS)
+        except AttributeError:
+            # Handle case where cfg.COMMENTS doesn't exist (good practice)
+            print("ERROR: cfg.COMMENTS not found for RANDOM mode.")
+            return None 
     
     if mode == "AI" and client:
         # Construct the user prompt, giving the AI the post to comment on
@@ -58,23 +61,17 @@ def generate_comment(post_text: str, mode="RANDOM"):
                 print(f"AI-Generated Comment: '{ai_comment}'")
                 return ai_comment
             
-            # Fallback if AI returns an empty string
-            print("AI returned an empty comment. Using fallback.")
+            # -----------------------------------------------------------------------
+            #  CHANGE 1 & 2: If AI returns empty, we log it and return None (skip).
+            # -----------------------------------------------------------------------
+            print("AI returned an empty comment. Skipping comment.")
+            return None
             
         except Exception as e:
-            print(f"Error calling Gemini API: {e}. Using fallback comment.")
-            
-        # Fallback to a random static comment if AI generation fails or is empty
-        return random.choice(FALLBACK_COMMENTS)
+            #  CHANGE 3: If API call fails, we log it and return None (skip).
+            print(f"Error calling Gemini API: {e}. Skipping comment entirely.")
+            return None
 
-    # If the client couldn't be initialized or mode is neither, return original placeholder logic
-    return f"(AI simulated comment related to: {post_text[:50]}...)"
-
-
-# You should define the COMMENTS list in config.py if it is used globally, 
-# or ensure you are not relying on the old static list in this file. 
-# Since your listener uses cfg.MODE, we ensure the function handles the logic above.
-# If you want to keep the old static comments for the 'RANDOM' mode, 
-# you should move the list from the old file into config.py as cfg.COMMENTS.
-# For simplicity, I'll assume you keep the original comments in a separate file for now, 
-# but if you get an error that cfg.COMMENTS doesn't exist, you'll need to move them.
+    # If the client couldn't be initialized or mode is neither, return None
+    print("AI client not available or mode not 'AI'. Skipping comment.")
+    return None
