@@ -8,7 +8,40 @@ MODE = "AI" # <<< CHANGED from "RANDOM" to "AI"
 # ---------------------------
 
 # Channels you want to monitor
-CHANNELS = ["tiktokleadsgen", "stockverified","TikTokmarketinghub", "NigeriaOcta", "cryptogeemss", "internetbusinessclub", "iinfluencerkenny", "cobcam", "businessrangers", "kemjii", "growtharena", "thriversglobal", "nwaigweela", "EmekaNobis","elevatewithvictor", "JesseEmmanuel","kingezekielfreetraining", "serlzo", "learndataentry", "victorymarkson", "Coach_faith_man", "CryptoVillaCalls", "freecrytoacademy", "CryptocurrencySIGHT001", "mentoraaworld", "uchecrypto", "pairsncoins", "makemoneywithsleektru", "Olaeasy111", "emmtruefacts", "AIPBLUEPRINT", "digitalznomad"]
+CHANNELS = ["tiktokleadsgen",
+            "stockverified",
+            "TikTokmarketinghub",
+            "NigeriaOcta",
+            "cryptogeemss",
+            "internetbusinessclub",
+            "iinfluencerkenny",
+            "cobcam",
+            "businessrangers",
+            "kemjii",
+            "growtharena",
+            "thriversglobal",
+            "nwaigweela",
+            "EmekaNobis",
+            "elevatewithvictor", 
+            "JesseEmmanuel",
+            "kingezekielfreetraining",
+            "serlzo", 
+            "learndataentry",
+            "victorymarkson",
+            "Coach_faith_man", 
+            "CryptoVillaCalls",
+            "freecrytoacademy",
+            "CryptocurrencySIGHT001",
+            "mentoraaworld",
+            "uchecrypto",
+            "pairsncoins",
+            "makemoneywithsleektru",
+            "Olaeasy111",
+            "emmtruefacts",
+            "AIPBLUEPRINT",
+            "digitalznomad",
+            -1001702188149 #Stakecut
+            ]
 
 # Behaviour controls
 DELAY_RANGE = (15, 60)
