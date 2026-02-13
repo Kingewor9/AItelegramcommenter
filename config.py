@@ -2,45 +2,14 @@
 API_ID = None
 API_HASH = None
 
-# --- NEW AI CONFIGURATION ---
-GEMINI_API_KEY = None # <<< IMPORTANT: Get this from Google AI Studio
-MODE = "AI" # <<< CHANGED from "RANDOM" to "AI"
+#Changed from AI to Random as the new behaviour
+MODE = "Random"
 # ---------------------------
 
 # Channels you want to monitor
 CHANNELS = ["tiktokleadsgen",
             "stockverified",
-            "TikTokmarketinghub",
-            "NigeriaOcta",
-            "cryptogeemss",
-            "internetbusinessclub",
-            "iinfluencerkenny",
-            "cobcam",
-            "businessrangers",
-            "kemjii",
-            "growtharena",
-            "thriversglobal",
-            "nwaigweela",
-            "EmekaNobis",
-            "elevatewithvictor", 
-            "JesseEmmanuel",
-            "kingezekielfreetraining",
-            "serlzo", 
-            "learndataentry",
-            "victorymarkson",
-            "Coach_faith_man", 
-            "CryptoVillaCalls",
-            "freecrytoacademy",
-            "CryptocurrencySIGHT001",
-            "mentoraaworld",
-            "uchecrypto",
-            "pairsncoins",
-            "makemoneywithsleektru",
-            "Olaeasy111",
-            "emmtruefacts",
-            "AIPBLUEPRINT",
-            "digitalznomad",
-            -1001702188149 #Stakecut
+            -1002404659940 #Practicals channel
             ]
 
 # Behaviour controls
