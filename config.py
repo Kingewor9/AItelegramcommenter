@@ -3,7 +3,7 @@ API_ID = None
 API_HASH = None
 
 #Changed from AI to Random as the new behaviour
-MODE = "Random"
+MODE = "RANDOM"
 # ---------------------------
 
 # Channels you want to monitor
