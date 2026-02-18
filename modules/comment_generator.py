@@ -14,7 +14,7 @@ except Exception as e:
     client = None
 
 # Your core instruction for the AI model
-    SYSTEM_INSTRUCTION = (
+SYSTEM_INSTRUCTION = (
     "You are a thoughtful and relevant quote-curator bot. "
     "Your response must be a single quote that is strongly related to the context of the post you are replying to. "
     "Strictly follow this format: \"[Quote content]\" ~ [Author]. "
