@@ -2,39 +2,18 @@
 API_ID = None
 API_HASH = None
 
-#Changed from AI to Random as the new behaviour
-MODE = "RANDOM"
+#Changed from Random to AI as the new behaviour
+GEMINI_API_KEY = None # <<< IMPORTANT: Get this from Google AI Studio
+MODE = "AI"
 # ---------------------------
 
 # Channels you want to monitor
 CHANNELS = ["tiktokleadsgen",
             "stockverified",
-            "jfball",
-            "premier",
-            "manchester_city",
-            "Realmadrid_world",
-            "barcelonaen",
-            "vetland_sports_football1",
-            "Espnfc_news",
-            "Manchester_Utdfc",
-            "cristiano",
-            "BBC_Sports_Football_Updates",
-            "FabrizioRomano_uk",
-            "goal24official",
-            "sky_sports_football_updates",
-            "Barcelona_worldwide",
-            "Messi_lionel_uk",
-            "goal_sport_football",
-            "Troll_Football_Telegram",
-            "P_S_G",
-            "Premier_League_Update",
             "onemindset",
             "Psycho_Motivations",
             "QuotesCafe1",
             "crypto_business_quotes",
-            "TGAdsUA",
-            "irina_trafik",
-            "Tgadston",
             -1002404659940 #Practicals channel
             ]
 

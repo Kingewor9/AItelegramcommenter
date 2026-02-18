@@ -7,7 +7,7 @@ from modules.listener import register_handlers
 load_dotenv()
 cfg.API_ID = int(os.getenv("API_ID"))
 cfg.API_HASH = os.getenv("API_HASH")
-#cfg.GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+cfg.GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 client = TelegramClient("session_name", cfg.API_ID, cfg.API_HASH)
 
