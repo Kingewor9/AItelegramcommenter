@@ -25,7 +25,7 @@ async def send_gif(client, entity, keyword, reply_to=None, comment_to=None):
     if comment_to is not None:
         kwargs['comment_to'] = comment_to
         
-    return await client.send_message(entity, message="", file=results[0], **kwargs)
+    return await results[0].click(entity, hide_via=True, **kwargs)
 
 def register_handlers(client, cfg):
     print(f"Registering handler for channels: {cfg.CHANNELS}")
