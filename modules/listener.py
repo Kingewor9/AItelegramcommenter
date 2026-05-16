@@ -12,6 +12,21 @@ import config as cfg
 # Simple in-memory queue for replies: list of dicts {linked, event_msg_id, channel_id, comment_text, enqueued_at}
 reply_queue = []
 
+async def send_gif(client, entity, keyword, reply_to=None, comment_to=None):
+    if not keyword:
+        return None
+    results = await client.inline_query('gif', keyword)
+    if not results:
+        raise Exception(f"No GIFs found from inline query for keyword: {keyword}")
+    
+    kwargs = {}
+    if reply_to is not None:
+        kwargs['reply_to'] = reply_to
+    if comment_to is not None:
+        kwargs['comment_to'] = comment_to
+        
+    return await client.send_message(entity, message="", file=results[0], **kwargs)
+
 def register_handlers(client, cfg):
     print(f"Registering handler for channels: {cfg.CHANNELS}")
 
@@ -35,8 +50,11 @@ def register_handlers(client, cfg):
         post_text = event.message.message or ""
         comment_text = generate_comment(post_text, cfg.MODE)
 
+        if not comment_text:
+            return
+
         # Demo: print instead of sending
-        print(f"[{chat}] → would comment: {comment_text}")
+        print(f"[{chat}] → would send GIF for keyword: {comment_text}")
 
         if not cfg.LOG_ONLY:
             try:
@@ -60,8 +78,8 @@ def register_handlers(client, cfg):
                             # This often creates the threaded reply automatically in the linked discussion.
                             try:
                                 try:
-                                    await client.send_message(event.chat, comment_text, comment_to=event.message)
-                                    print('Comment sent using comment_to on channel entity')
+                                    await send_gif(client, event.chat, comment_text, comment_to=event.message)
+                                    print('GIF sent using comment_to on channel entity')
                                     # record timestamp
                                     last_sent[getattr(event.chat, 'id', None)] = time.time()
                                     # we've posted the comment already, exit the handler
@@ -85,8 +103,8 @@ def register_handlers(client, cfg):
 
                             if discussion_msg_id:
                                 try:
-                                    await client.send_message(linked, comment_text, reply_to=discussion_msg_id)
-                                    print('Comment sent to linked discussion (as reply)')
+                                    await send_gif(client, linked, comment_text, reply_to=discussion_msg_id)
+                                    print('GIF sent to linked discussion (as reply)')
                                 except Exception as e:
                                     # Try to parse a server-requested wait from the RPC error string
                                     try:
@@ -105,9 +123,9 @@ def register_handlers(client, cfg):
                                 # Attempt to send a plain message immediately so users see something.
                                 sent_id = None
                                 try:
-                                    m = await client.send_message(linked, comment_text)
+                                    m = await send_gif(client, linked, comment_text)
                                     sent_id = getattr(m, 'id', None)
-                                    print('Sent plain message to linked discussion (will convert later if possible)', sent_id)
+                                    print('Sent plain GIF to linked discussion (will convert later if possible)', sent_id)
                                 except Exception as e:
                                     # parse server wait errors like: "A wait of 881 seconds is required before sending another message in this chat"
                                     wait_seconds = None
@@ -226,12 +244,12 @@ def register_handlers(client, cfg):
                             else:
                                 try:
                                     if discussion_msg_id:
-                                        await client.send_message(linked, comment_text, reply_to=discussion_msg_id)
-                                        print('Comment sent to linked discussion (as reply)')
+                                        await send_gif(client, linked, comment_text, reply_to=discussion_msg_id)
+                                        print('GIF sent to linked discussion (as reply)')
                                     else:
-                                        print('No specific discussion message found; sending a plain message to linked discussion')
-                                        await client.send_message(linked, comment_text)
-                                        print('Comment sent to linked discussion')
+                                        print('No specific discussion message found; sending a plain GIF to linked discussion')
+                                        await send_gif(client, linked, comment_text)
+                                        print('GIF sent to linked discussion')
 
                                     # record timestamp
                                     last_sent[linked] = time.time()
@@ -258,12 +276,12 @@ def register_handlers(client, cfg):
                                         print('Error sending comment:', e)
                     else:
                         print('No linked discussion found; attempting to reply (may require admin)')
-                        await event.reply(comment_text)
-                        print('Reply sent (if permitted)')
+                        await send_gif(client, event.chat, comment_text, reply_to=event.message.id)
+                        print('Reply GIF sent (if permitted)')
                 else:
                     # Not a broadcast channel — safe to reply normally
-                    await event.reply(comment_text)
-                    print('Reply sent')
+                    await send_gif(client, event.chat, comment_text, reply_to=event.message.id)
+                    print('Reply GIF sent')
             except Exception as e:
                 print('Error sending comment:', e)
 
@@ -363,8 +381,8 @@ def register_handlers(client, cfg):
                         if time.time() < na:
                             print('Skipping queued send: server requested wait until', na)
                         else:
-                            await client.send_message(linked, job['comment_text'], reply_to=discussion_msg_id)
-                            print('Queued comment sent as reply to discussion message', discussion_msg_id)
+                            await send_gif(client, linked, job['comment_text'], reply_to=discussion_msg_id)
+                            print('Queued GIF sent as reply to discussion message', discussion_msg_id)
                     except FloodWaitError as fw:
                         print('Reply queue FloodWaitError, sleeping', fw.seconds)
                         await asyncio.sleep(fw.seconds)

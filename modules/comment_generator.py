@@ -13,21 +13,14 @@ except Exception as e:
     print(f"Error initializing Gemini client: {e}")
     client = None
 
-# Your core instruction for the AI model
+# Core instruction for extracting GIF search keywords
 SYSTEM_INSTRUCTION = (
-    "You are a thoughtful and relevant quote-curator bot. "
-    "Your response must be a single quote that is strongly related to the context of the post you are replying to. "
-    "Strictly follow this format: \"[Quote content]\" ~ [Author]. "
-    "Use simple English and avoid all emojis. "
-    "The total length must be under 160 characters to ensure it fits well in Telegram comments. "
-    "Ensure the quote is impactful and matches the tone of the conversation. "
-    "Examples: \"Fortune favors the bold\" ~ Virgil, \"Life is beans and beans is life\" ~ Anonymous, \"The only way to do great work is to love what you do\" ~ Steve Jobs"
+    "You are an assistant that extracts keywords for a GIF search from sports-related Telegram posts. "
+    "Identify the most prominent football player, coach, manager, or event mentioned in the post. "
+    "Return ONLY their name or a concise action (e.g., 'Bruno Fernandes celebration', 'Bukayo Saka', 'Erik ten Hag'). "
+    "Do not include any other text, punctuation, or conversational filler. "
+    "If no relevant person, team, or clear visually-representable event can be identified, return an empty string."
 )
-
-# ----------------------------------------------------
-#  REMOVED: FALLBACK_COMMENTS list has been deleted.
-# ----------------------------------------------------
-
 
 def generate_comment(post_text: str, mode="RANDOM"):
     if mode == "RANDOM":
@@ -36,12 +29,11 @@ def generate_comment(post_text: str, mode="RANDOM"):
         try:
             return random.choice(cfg.COMMENTS)
         except AttributeError:
-            # Handle case where cfg.COMMENTS doesn't exist (good practice)
             print("ERROR: cfg.COMMENTS not found for RANDOM mode.")
             return None 
     
     if mode == "AI" and client:
-        # Construct the user prompt, giving the AI the post to comment on
+        # Construct the user prompt
         user_prompt = f"The channel post text is: \"{post_text}\""
         
         try:
@@ -52,28 +44,24 @@ def generate_comment(post_text: str, mode="RANDOM"):
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_INSTRUCTION,
                     # Setting temperature low encourages more focused, less random output
-                    temperature=0.5, 
+                    temperature=0.3, 
                 )
             )
             
-            # The AI might return extra text or formatting; we'll strip it down
-            ai_comment = response.text.strip()
+            # Extract the raw keyword
+            keyword = response.text.strip()
             
-            if ai_comment:
-                print(f"AI-Generated Comment: '{ai_comment}'")
-                return ai_comment
+            if keyword:
+                print(f"AI-Extracted GIF Keyword: '{keyword}'")
+                return keyword
             
-            # -----------------------------------------------------------------------
-            #  CHANGE 1 & 2: If AI returns empty, we log it and return None (skip).
-            # -----------------------------------------------------------------------
-            print("AI returned an empty comment. Skipping comment.")
+            print("AI returned an empty extracted keyword. Skipping GIF.")
             return None
             
         except Exception as e:
-            #  CHANGE 3: If API call fails, we log it and return None (skip).
-            print(f"Error calling Gemini API: {e}. Skipping comment entirely.")
+            print(f"Error calling Gemini API: {e}. Skipping entirely.")
             return None
 
     # If the client couldn't be initialized or mode is neither, return None
     print("AI client not available or mode not 'AI'. Skipping comment.")
-    return None
+    return None
