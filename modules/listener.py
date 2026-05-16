@@ -12,9 +12,17 @@ import config as cfg
 # Simple in-memory queue for replies: list of dicts {linked, event_msg_id, channel_id, comment_text, enqueued_at}
 reply_queue = []
 
+# Set to store chat IDs that block GIFs so we don't spam them
+banned_gif_chats = set()
+
 async def send_gif(client, entity, keyword, reply_to=None, comment_to=None):
     if not keyword:
         return None
+        
+    chat_id = getattr(entity, 'id', entity)
+    if chat_id in banned_gif_chats:
+        raise Exception("BANNED_GIF: Chat prevents sending GIFs.")
+        
     results = await client.inline_query('gif', keyword)
     if not results:
         raise Exception(f"No GIFs found from inline query for keyword: {keyword}")
@@ -25,7 +33,14 @@ async def send_gif(client, entity, keyword, reply_to=None, comment_to=None):
     if comment_to is not None:
         kwargs['comment_to'] = comment_to
         
-    return await results[0].click(entity, hide_via=True, **kwargs)
+    try:
+        return await results[0].click(entity, hide_via=True, **kwargs)
+    except Exception as e:
+        err_str = str(e).lower()
+        if "can't send gifs" in err_str or ("not allowed" in err_str and "gif" in err_str):
+            banned_gif_chats.add(chat_id)
+            raise Exception(f"BANNED_GIF: {e}")
+        raise
 
 def register_handlers(client, cfg):
     print(f"Registering handler for channels: {cfg.CHANNELS}")
@@ -87,7 +102,10 @@ def register_handlers(client, cfg):
                                 except TypeError:
                                     # send_message doesn't accept comment_to in this Telethon build
                                     raise
-                            except Exception:
+                            except Exception as e:
+                                if "BANNED_GIF" in str(e):
+                                    print(f"Skipping channel: {e}")
+                                    return
                                 # Not supported or failed - fall back to the existing approach
                                 pass
                             discussion_msg_id = None
@@ -118,6 +136,9 @@ def register_handlers(client, cfg):
                                         next_allowed[linked] = time.time() + wait_seconds
                                         print('Server asked to wait', wait_seconds, 'seconds before sending to', linked)
                                     else:
+                                        if "BANNED_GIF" in str(e):
+                                            print(f"GIFs are disabled in {linked}. Skipping completely.")
+                                            return
                                         print('Error sending reply to linked discussion:', e)
                             else:
                                 # Attempt to send a plain message immediately so users see something.
@@ -171,6 +192,9 @@ def register_handlers(client, cfg):
                                         # skip the normal enqueue below since we've already handled it
                                         return
                                     else:
+                                        if "BANNED_GIF" in str(e):
+                                            print(f"GIFs are disabled in {linked}. Skipping completely.")
+                                            return
                                         print('Error sending immediate plain message to linked discussion:', e)
                                 # If we get here we either enqueued above or already printed the error
                                 retries = 4
@@ -273,6 +297,9 @@ def register_handlers(client, cfg):
                                         next_allowed[linked] = time.time() + wait_seconds
                                         print('Server asked to wait', wait_seconds, 'seconds before sending to', linked)
                                     else:
+                                        if "BANNED_GIF" in str(e):
+                                            print(f"GIFs are disabled in {linked}. Skipping completely.")
+                                            return
                                         print('Error sending comment:', e)
                     else:
                         print('No linked discussion found; attempting to reply (may require admin)')
@@ -400,7 +427,10 @@ def register_handlers(client, cfg):
                             next_allowed[linked] = time.time() + wait_seconds
                             print('Reply queue: server asked to wait', wait_seconds, 'seconds before sending to', linked)
                         else:
-                            print('Error sending queued comment:', e)
+                            if "BANNED_GIF" in str(e):
+                                print(f"Reply queue dropped: GIFs disabled in {linked}.")
+                            else:
+                                print('Error sending queued comment:', e)
                     finally:
                         # remove job
                         try:
